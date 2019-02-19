@@ -13,6 +13,25 @@ var CLIENT_ID = require('../config/config.js').CLIENT_ID;
 const {OAuth2Client} = require('google-auth-library');  // npm install google-auth-library --save
 const client = new OAuth2Client(CLIENT_ID);
 
+
+var mdAutentication = require('../middlewares/autenticacion');
+
+// ===================================================
+// 
+// ===================================================
+app.get('/renuevatoken', mdAutentication.verificaToken, ( req, res ) => {
+
+    var token = jwt.sign( { usuario: req.usuario}, SEED, { expiresIn: 14400});
+
+    res.status(200).json( {
+        ok: true,
+        usuario: req.usuario,
+        token: token
+    })
+})
+
+
+
 // ===================================================
 // Autenticacion Google
 // ===================================================
@@ -83,7 +102,8 @@ app.post('/google', async (req, res) => {
                     usuario: usuarioDB,
                     token: token,
                     mensaje: 'Login post correcto',
-                    id: usuarioDB._id
+                    id: usuarioDB._id,
+                    menu: obtenerMenu( usuarioDB.role)
                 });                
             }
         }
@@ -116,7 +136,8 @@ app.post('/google', async (req, res) => {
                     usuario: usuarioDB,
                     token: token,
 
-                    id: usuarioDB._id
+                    id: usuarioDB._id,
+                    menu: obtenerMenu( usuarioDB.role)
                 });                  
             });
         }
@@ -184,11 +205,58 @@ app.post('/', (req, res) => {
             usuario: usuarioDB,
             token: token,
             mensaje: 'Login post correcto',
-            id: usuarioDB._id
+            id: usuarioDB._id,
+            menu: obtenerMenu( usuarioDB.role)
         });
     
     });
 
 });
+
+
+
+// ===================================================
+// Menu Dínamico
+// ===================================================
+function obtenerMenu( ROLE ) {
+
+	var menu = [
+		{
+			titulo: 'Principal',
+			icono: 'mdi mdi-gauge',
+			submenu: [
+				{ titulo: 'Dashboard', url: '/dashboard'},
+				{ titulo: 'ProgressBar', url: '/progress'},
+				{ titulo: 'Gráficas', url: '/graficas1'},
+				{ titulo: 'Promesas', url: '/promesas'},
+				{ titulo: 'rxjs', url: '/rxjs'},
+
+			]
+		},
+
+		{
+			titulo: 'Mantenimientos',
+			icono: 'mdi mdi-folder-lock-open',
+			submenu: [
+				// { titulo: 'Usuarios', url: '/usuarios'}, 
+				{ titulo: 'Hospitales', url: '/hospitales'},
+				{ titulo: 'Médicos', url: '/medicos'},
+			]
+		},
+
+
+	];
+
+
+    if ( ROLE === 'ADMIN_ROLE' ) {
+
+        menu[1].submenu.unshift( { titulo: 'Usuarios', url: '/usuarios'} ); // unshift agrega el item al principio del arreglo
+    }
+
+    return menu;
+}
+
+
+
 
 module.exports = app;

@@ -20,7 +20,7 @@ app.get('/', (req, res, next) => {
     // .skip(desde) Indica desde donde empieza
     // .limit(5)   Limita la cantidad de resultados
 
-    Usuario.find( {}, 'nombre email img role')
+    Usuario.find( {}, 'nombre email img role google')
         .skip(desde)
         .limit(5)
         .exec(
@@ -57,15 +57,15 @@ app.get('/', (req, res, next) => {
 
 
 // ===============================================
-// Actualizar todos los usuarios
+// Actualizar usuarios
 // ===============================================
-app.put('/:id', (req, res) => {
+app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_MismoUsuario], (req, res) => {
 
     var id = req.params.id;
     var body = req.body;
+    
 
-
-    Usuario.findById( id, mdAutenticacion.verificaToken, (err, usuario) =>  {
+    Usuario.findById( id, (err, usuario) =>  {
 
         
 
@@ -90,7 +90,7 @@ app.put('/:id', (req, res) => {
         
         usuario.nombre = body.nombre;
         usuario.email = body.email;
-        usuario.role = usuario.role;
+        usuario.role = body.role;
 
         usuario.save( (err, usuarioGuardado) => {
 
@@ -103,10 +103,12 @@ app.put('/:id', (req, res) => {
                 });
             }            
             
+            usuarioGuardado.password = ':)';
             // Petición HTTP 200 (Ok)
             res.status(200).json( {
                 ok: true,
                 id: id,
+                usuario: usuarioGuardado
             })              
         });
 
@@ -118,7 +120,7 @@ app.put('/:id', (req, res) => {
 // ===============================================
 // Crear usuarios
 // ===============================================
-app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+app.post('/',  (req, res) => {
 
     var body = req.body;
 
@@ -160,7 +162,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 // Borrar usuario por id
 // ===============================================
 
-app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.delete('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_ROLE], (req, res) => {
 
     var id = req.params.id; // este id debe llamarse igual al que definimos en '/:id'
 

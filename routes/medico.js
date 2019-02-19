@@ -36,7 +36,7 @@ app.get('/', (req, res, next) => {
                 Medico.count( {}, (err, conteo) => {
                     res.status(200).json( {
                         ok: true,
-                        usuarios: medicos,
+                        medicos: medicos,
                         total: conteo
                     })                
     
@@ -45,6 +45,47 @@ app.get('/', (req, res, next) => {
         );
 });
 
+
+
+// ===================================================
+// Obtener un medico
+// ===================================================
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    Medico.findById( id )
+        .populate('usuario', 'nombre email img')
+        .populate('hospital')
+        .exec( (err, medico) => {
+
+
+            // El error HTTP 500 ( Internal Server Error)
+            if ( err ) {
+                return res.status(500).json( {
+                    ok: false,
+                    mensaje: 'Error al buscar medico',
+                    errors: err
+                });
+            }        
+
+            // El error HTTP 400 (Bad Request)
+            if ( !medico ) {
+                return res.status(400).json( {
+                    ok: false,
+                    mensaje: 'El medico con el id:' + id + ' no existe',
+                    errors: { message: 'No existe un medico con ese ID'}
+                });
+            }   
+
+
+            res.status(200).json( {
+                ok: true,
+                medico: medico
+            })
+
+        })
+});
 
 // ===============================================
 // Crear Medicoes
@@ -57,7 +98,7 @@ app.post('/', mdAutenticacion.verificaToken,  (req, res) =>{
 
         nombre: body.nombre,
         img: body.img,
-        usuario: body.usuario,
+        usuario: req.usuario._id,
         hospital: body.hospital
     });
 

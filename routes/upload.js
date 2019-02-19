@@ -144,7 +144,7 @@ function subirPorTipo ( tipo, id, nombreArchivo, res) {
 
             medico.img = nombreArchivo;
 
-            medico.save( (err, usuarioActualizado) => {
+            medico.save( (err, medicoActualizado) => {
 
                 return res.status(200).json( {
                     ok: true,
@@ -183,7 +183,7 @@ function subirPorTipo ( tipo, id, nombreArchivo, res) {
                 return res.status(200).json( {
                     ok: true,
                     mensaje: 'Hospital actualizado',
-                    usuario: hospitalActualizado
+                    hospital: hospitalActualizado
                 });
             });
 
